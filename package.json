@@ -1,0 +1,20 @@
+{
+  "name": "creole",
+  "description": "Creole parser",
+  "version": "0.0.0",
+  "author": "shin1morita@gmail.com",
+  "repository": "git://github.com/shin1m/creole.js.git",
+  "main": "build/creole.js",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "prepublish": "coffee -o build -c creole.coffee",
+    "test": "mocha --compilers coffee:coffee-script -r should -R spec test.coffee"
+  },
+  "devDependencies": {
+    "coffee-script": "*",
+    "mocha": "*",
+    "should": "*"
+  }
+}
