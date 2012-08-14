@@ -46,6 +46,7 @@ textMarkups = [
   linkTextMarkups
   '\\[\\[(?:' + linkPatterns + ')(?:\\||\\]\\])'
   rawUrl
+  '<<[A-Za-z_]\\w*'
   '~(?:' + rawUrl + '|.)'
 ].join('|')
 inTableCell = new RegExp '(\\||\\n|$)|' + textMarkups, 'g'
@@ -136,8 +137,19 @@ parseLinkText = (target, source, i) ->
       ++i if source.charAt(i) == ']'
   i
 
+parseMacroParameters = (source, i) ->
+  rx = />>|[\t ]+([A-Za-z_]\w*)='([^'\\]*(?:\\.|[^'\\])*)'|(.?)/g
+  parameters = {}
+  while true
+    result = match rx, source, i
+    return null if result[3]?
+    i = rx.lastIndex
+    break if result[0].charAt(0) == '>'
+    parameters[result[1]] = result[2].replace /\\(.)/g, '$1'
+  [i, parameters]
+
 parseText = (rx, target, source, i) ->
-  i = parseLine rx, target, source, i, (target, result, i) =>
+  i = parseLine rx, target, source, i, (target, result, i) ->
     switch result[0].charAt(0)
       when '['
         target.start 'link', linkOptions(result[8], result[6], result[7])
@@ -145,6 +157,14 @@ parseText = (rx, target, source, i) ->
           i = parseLinkText target, source, i
         else
           target.text result[6] ? result[7] ? result[8]
+      when '<'
+        ip = parseMacroParameters source, i
+        if ip
+          i = ip[0]
+          target.start 'macro', {name: result[0].substr(2), parameters: ip[1]}
+        else
+          target.text result[0]
+          return i
       when '~'
         target.start 'escaped'
         target.text result[0].substr(1)

@@ -76,8 +76,8 @@ class TestBuilder
       @e options.link
       @u '" title="'
       @e options.title
-      @u '" />'
-    end: ->
+      @u '">'
+    end: -> @u '</img>'
   table:
     start: -> @u '<table>'
     end: -> @u '</table>'
@@ -99,6 +99,15 @@ class TestBuilder
   escaped:
     start: -> @u '<escaped>'
     end: -> @u '</escaped>'
+  macro:
+    start: (options) ->
+      @u '<macro ' + options.name
+      for key in (key for key of options.parameters).sort()
+        @u key + '="'
+        @e options.parameters[key]
+        @u '"'
+      @u '>'
+    end: -> @u '</macro>'
   start: (name, options) ->
     handler = @[name]
     if handler?
@@ -396,7 +405,8 @@ describe 'Creole 1.0', ->
     e: myimage.png
     u: " title="
     e: this is my image
-    u: " />
+    u: ">
+    u: </img>
     u: </p>
     '''
   it 'should parse Tables', ->
@@ -595,6 +605,34 @@ describe 'Creole 1.0', ->
     u: </tt>
     u: </li>
     u: </ol>
+    '''
+  it 'should parse Macro', ->
+    creole.parse builder, '''
+    <<foo0>>
+    <<foo1 bar0='zot'>>
+    <<foo2 bar0='zot' bar1='z\\'o\\'t'>>
+    '''
+    builder.result.join('\n').should.equal '''
+    u: <p>
+    u: <macro foo0
+    u: >
+    u: </macro>
+    u: <macro foo1
+    u: bar0="
+    e: zot
+    u: "
+    u: >
+    u: </macro>
+    u: <macro foo2
+    u: bar0="
+    e: zot
+    u: "
+    u: bar1="
+    e: z'o't
+    u: "
+    u: >
+    u: </macro>
+    u: </p>
     '''
 
 describe 'Creole 1.0 Test Cases', ->
@@ -1078,7 +1116,8 @@ u: " src="
 e: Red-Flower.jpg
 u: " title="
 e: here is a red flower
-u: " />
+u: ">
+u: </img>
 u: </p>
 u: <h3>
 e: Creole 0.4
