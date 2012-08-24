@@ -213,7 +213,7 @@ describe 'Creole 1.0', ->
     === Also level 3
     === Also level 3 =
     === Also level 3 ==
-    === **not** //parsed// ===
+    === ~**not~** ~//parsed~// ===
     '''
     builder.result.join('\n').should.equal '''
     u: <h1>
@@ -244,7 +244,22 @@ describe 'Creole 1.0', ->
     e: Also level 3
     u: </h3>
     u: <h3>
-    e: **not** //parsed//
+    u: <escaped>
+    e: *
+    u: </escaped>
+    e: *not
+    u: <escaped>
+    e: *
+    u: </escaped>
+    e: *
+    u: <escaped>
+    e: /
+    u: </escaped>
+    e: /parsed
+    u: <escaped>
+    e: /
+    u: </escaped>
+    e: /
     u: </h3>
     '''
   it 'should parse Links', ->

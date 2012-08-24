@@ -49,6 +49,7 @@ textMarkups = [
   '<<[A-Za-z_]\\w*'
   '~(?:' + rawUrl + '|.)'
 ].join('|')
+inHeading = new RegExp '((?:[\\t ]=+[\\t ]*)?(?:\\n|$))|' + textMarkups, 'g'
 inTableCell = new RegExp '(\\||\\n|$)|' + textMarkups, 'g'
 headingRuleTable = '={1,6}[\\t ]|----[\\t ]*(?:\\n|$)|\\|'
 itemPrefixes = headingRuleTable + '|[*#]*(?:\\*(?!\\*)|#(?!#))'
@@ -175,10 +176,9 @@ parseText = (rx, target, source, i) ->
 
 parseHeading = (n, target, source, i) ->
   target.start 'heading' + (n - 1)
-  i += n
-  rx = /(?:[\t ]=+[\t ]*)?(?:\n|$)/g
-  result = match rx, source, i
-  target.text source.substring(i, result.index)
+  rx = /\n|$/g
+  rx.lastIndex = parseText inHeading, target, source, i + n
+  rx.test source
   target.end()
   rx.lastIndex
 
